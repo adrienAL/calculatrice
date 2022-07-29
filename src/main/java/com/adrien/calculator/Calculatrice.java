@@ -73,16 +73,18 @@ public class Calculatrice {
 				String blocBefore = "";
 				String blocAfter = "";
 				if (elementm1.equals(")")) {
-					blocBefore = "(" + this.extractBlocBefore(elements.subList(0, i)) + ")";
+					blocBefore = this.extractBlocBefore(elements.subList(0, i));
 					numBefor = this.resolveBloc(blocBefore);
+					blocBefore = "(" + blocBefore + ")";
 				} else {
 					blocBefore = elementm1;
 					numBefor = Double.parseDouble(elementm1);
 				}
 
 				if (elementp1.equals("(")) {
-					blocAfter = "(" + this.extractBlocAfter(elements.subList(i + 1, elements.size())) + ")";
+					blocAfter = this.extractBlocAfter(elements.subList(i + 1, elements.size()));
 					numAfter = this.resolveBloc(blocAfter);
+					blocAfter = "(" + blocAfter + ")";
 				} else {
 					blocAfter = elementp1;
 					numAfter = Double.parseDouble(elementp1);
@@ -99,8 +101,7 @@ public class Calculatrice {
 					return Double.parseDouble(newArg);
 				} catch (Exception e) {
 					System.out.println("un autre bloc :  " + newArg);
-					break;
-					// return this.resolveBloc(newArg);
+					return this.resolveBloc(newArg);
 				}
 
 			}
