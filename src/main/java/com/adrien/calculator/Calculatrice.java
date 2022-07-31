@@ -38,13 +38,18 @@ public class Calculatrice {
 		case '/': {
 			return arg1 / arg2;
 		}
+		case '+': {
+			return arg1 + arg2;
+		}
+		case '-': {
+			return arg1 - arg2;
+		}
 		default:
 			return null;
 		}
 	}
 
 	public Double resolveBloc(String arg) {
-		System.out.println(arg);
 		Character[] chars = ArrayUtils.toObject(arg.toCharArray());
 		List<String> elements = new ArrayList<String>();
 		int indexNumber = 0;
@@ -63,7 +68,7 @@ public class Calculatrice {
 
 			}
 		}
-		// dans un premier temps on fait les multiplications
+		// dans un premier temps on fait les multiplications et divisions
 		for (int i = 0; i < elements.size(); i++) {
 			String element = elements.get(i);
 
@@ -107,22 +112,78 @@ public class Calculatrice {
 				String toReplace = blocBefore + element + blocAfter;
 				toReplace = toReplace.replaceAll("\\*", "\\\\*");
 				toReplace = toReplace.replaceAll("\\/", "\\\\/");
+				toReplace = toReplace.replaceAll("\\+", "\\\\+");
+				toReplace = toReplace.replaceAll("\\-", "\\\\-");
 				toReplace = toReplace.replaceAll("\\(", "\\\\(");
 				toReplace = toReplace.replaceAll("\\)", "\\\\)");
 				String newArg = arg.replaceAll(toReplace,
 						String.valueOf(this.opperationSimple(numBefor, numAfter, element.charAt(0))));
-				System.out.println("arg : " + arg);
-				System.out.println("toReplace : " + toReplace);
-				System.out.println("res multipli : "
-						+ String.valueOf(this.opperationSimple(numBefor, numAfter, element.charAt(0))));
-				System.out.println("newArg : " + newArg);
+
 				try {
 					return Double.parseDouble(newArg);
 				} catch (Exception e) {
-					System.out.println("un autre bloc :  " + newArg);
 					return this.resolveBloc(newArg);
 				}
 
+			}
+		}
+
+		// traitement des autres oppération non prioritaires
+		for (int i = 0; i < elements.size(); i++) {
+			String element = elements.get(i);
+
+			if (element.equals("+") || element.equals("-")) {
+				String elementm1 = "";
+				String elementp1 = "";
+				try {
+					elementm1 = elements.get(i - 1);
+				} catch (Exception e) {
+					System.out.println("elementm1 ereure : " + arg);
+				}
+				try {
+					elementp1 = elements.get(i + 1);
+				} catch (Exception e) {
+					System.out.println("elementp1 erreur : " + arg);
+				}
+
+				double numBefor;
+				double numAfter;
+				String blocBefore = "";
+				String blocAfter = "";
+				if (elementm1.equals(")")) {
+					blocBefore = this.extractBlocBefore(elements.subList(0, i));
+					numBefor = this.resolveBloc(blocBefore);
+					blocBefore = "(" + blocBefore + ")";
+				} else {
+					blocBefore = elementm1;
+					numBefor = Double.parseDouble(elementm1);
+				}
+
+				if (elementp1.equals("(")) {
+					blocAfter = this.extractBlocAfter(elements.subList(i + 1, elements.size()));
+					numAfter = this.resolveBloc(blocAfter);
+					blocAfter = "(" + blocAfter + ")";
+				} else {
+					blocAfter = elementp1;
+					numAfter = Double.parseDouble(elementp1);
+				}
+
+				// création d'un nouveau bloc à résoudre avec le res de la multiplication
+				String toReplace = blocBefore + element + blocAfter;
+				toReplace = toReplace.replaceAll("\\*", "\\\\*");
+				toReplace = toReplace.replaceAll("\\/", "\\\\/");
+				toReplace = toReplace.replaceAll("\\+", "\\\\+");
+				toReplace = toReplace.replaceAll("\\-", "\\\\-");
+				toReplace = toReplace.replaceAll("\\(", "\\\\(");
+				toReplace = toReplace.replaceAll("\\)", "\\\\)");
+				String newArg = arg.replaceAll(toReplace,
+						String.valueOf(this.opperationSimple(numBefor, numAfter, element.charAt(0))));
+
+				try {
+					return Double.parseDouble(newArg);
+				} catch (Exception e) {
+					return this.resolveBloc(newArg);
+				}
 			}
 		}
 
