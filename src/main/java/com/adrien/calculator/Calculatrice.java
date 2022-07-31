@@ -30,6 +30,19 @@ public class Calculatrice {
 		}
 	}
 
+	public Double opperationSimple(double arg1, double arg2, char opp) {
+		switch (opp) {
+		case '*': {
+			return arg1 * arg2;
+		}
+		case '/': {
+			return arg1 / arg2;
+		}
+		default:
+			return null;
+		}
+	}
+
 	public Double resolveBloc(String arg) {
 		System.out.println(arg);
 		Character[] chars = ArrayUtils.toObject(arg.toCharArray());
@@ -54,7 +67,7 @@ public class Calculatrice {
 		for (int i = 0; i < elements.size(); i++) {
 			String element = elements.get(i);
 
-			if (element.equals("*")) {
+			if (element.equals("*") || element.equals("/")) {
 				String elementm1 = "";
 				String elementp1 = "";
 				try {
@@ -91,11 +104,17 @@ public class Calculatrice {
 				}
 
 				// création d'un nouveau bloc à résoudre avec le res de la multiplication
-				String toReplace = blocBefore + "\\*" + blocAfter;
-				String newArg = arg.replaceAll(toReplace, String.valueOf(this.multiplication(numBefor, numAfter)));
+				String toReplace = blocBefore + element + blocAfter;
+				toReplace = toReplace.replaceAll("\\*", "\\\\*");
+				toReplace = toReplace.replaceAll("\\/", "\\\\/");
+				toReplace = toReplace.replaceAll("\\(", "\\\\(");
+				toReplace = toReplace.replaceAll("\\)", "\\\\)");
+				String newArg = arg.replaceAll(toReplace,
+						String.valueOf(this.opperationSimple(numBefor, numAfter, element.charAt(0))));
 				System.out.println("arg : " + arg);
 				System.out.println("toReplace : " + toReplace);
-				System.out.println("res multipli : " + String.valueOf(this.multiplication(numBefor, numAfter)));
+				System.out.println("res multipli : "
+						+ String.valueOf(this.opperationSimple(numBefor, numAfter, element.charAt(0))));
 				System.out.println("newArg : " + newArg);
 				try {
 					return Double.parseDouble(newArg);
