@@ -30,7 +30,7 @@ class calculatriceTest {
 
 	// test de le résolution de block de calcule
 	@ParameterizedTest(name = "{0} doit être égal à {1}")
-	@CsvSource({ "5*5,25", "5*(5*1),25" })
+	@CsvSource({ "5*5,25", "5*(5+2*2),45" })
 	public void resolveBlocTest(String arg, double res) {
 		Double resultat = casio.resolveBloc(arg);
 
@@ -42,7 +42,7 @@ class calculatriceTest {
 	@ParameterizedTest(name = "{0} + {1} doit être égale à {2}")
 	@CsvSource({ "1,1,2", "1,0,1", "128,213.5,341.5" })
 	public void additionTest(double arg1, double arg2, double res) {
-		Double resultat = casio.add(arg1, arg2);
+		Double resultat = casio.opperationSimple(arg1, '+', arg2);
 
 		assertThat(resultat).isEqualTo(res);
 
@@ -52,7 +52,7 @@ class calculatriceTest {
 	@ParameterizedTest(name = "{0} - {1} doit être égale à {2}")
 	@CsvSource({ "1,1,0", "1,0,1", "128,213.5,-85.5" })
 	public void substractionTest(double arg1, double arg2, double res) {
-		Double resultat = casio.substraction(arg1, arg2);
+		Double resultat = casio.opperationSimple(arg1, '-', arg2);
 
 		assertThat(resultat).isEqualTo(res);
 
@@ -62,7 +62,7 @@ class calculatriceTest {
 	@ParameterizedTest(name = "{0} * {1} doit être égale à {2}")
 	@CsvSource({ "1,1,1", "1,0,0", "128,213.5,27328" })
 	public void multiplicationTest(double arg1, double arg2, double res) {
-		Double resultat = casio.multiplication(arg1, arg2);
+		Double resultat = casio.opperationSimple(arg1, '*', arg2);
 
 		assertThat(resultat).isEqualTo(res);
 
@@ -72,7 +72,7 @@ class calculatriceTest {
 	@ParameterizedTest(name = "{0} / {1} doit être égale à {2}")
 	@CsvSource({ "1,1,1", "0,1,0", "128,213.5,0.59953161592505854800936768149883" })
 	public void divisionTest(double arg1, double arg2, double res) {
-		Double resultat = casio.division(arg1, arg2);
+		Double resultat = casio.opperationSimple(arg1, '/', arg2);
 
 		assertThat(resultat).isEqualTo(res);
 

@@ -11,9 +11,11 @@ public class Menu {
 		do {
 			System.out.println("entrez votre calcule (exit pour quitter):");
 			calcule = scan.next();
+			// suppression de tous les espaces
+			calcule = calcule.replaceAll(" ", "");
 			if (!calcule.equals("exit")) {
 				Calculatrice casio = new Calculatrice();
-				double res = casio.resolveBloc(calcule);
+				Double res = casio.resolveBloc(calcule);
 				System.out.println(res);
 			}
 

@@ -8,41 +8,35 @@ import java.util.List;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class Calculatrice {
+	public String lstOperation[] = { "*", "/", "+", "-", "^", "!" };
 
-	public Double add(double arg1, double arg2) {
-		return arg1 + arg2;
-	}
-
-	public Double substraction(double arg1, double arg2) {
-		return arg1 - arg2;
-	}
-
-	public Double multiplication(double arg1, double arg2) {
-		return arg1 * arg2;
-	}
-
-	public Double division(double arg1, double arg2) {
-		// divition par zero interdite
-		if (arg2 == 0) {
-			return null;
-		} else {
-			return arg1 / arg2;
-		}
-	}
-
-	public Double opperationSimple(double arg1, double arg2, char opp) {
+	public Double opperationSimple(double arg1, char opp, double arg2) {
 		switch (opp) {
 		case '*': {
 			return arg1 * arg2;
 		}
 		case '/': {
-			return arg1 / arg2;
+			if (arg2 == 0) {
+				return null;
+			} else {
+				return arg1 / arg2;
+			}
 		}
 		case '+': {
 			return arg1 + arg2;
 		}
 		case '-': {
 			return arg1 - arg2;
+		}
+		case '^': {
+			return Math.pow(arg1, arg2);
+		}
+		case '!': {
+			Double resultat = 1.0;
+			for (int i = 2; i <= arg1; i++) {
+				resultat *= i;
+			}
+			return resultat;
 		}
 		default:
 			return null;
@@ -65,133 +59,87 @@ public class Calculatrice {
 				// si plus un chiffre on passe au suivant et on ajoute l'opperation
 				elements.add(String.valueOf(chars[i]));
 				indexNumber = elements.size();
-
 			}
 		}
-		// dans un premier temps on fait les multiplications et divisions
-		for (int i = 0; i < elements.size(); i++) {
-			String element = elements.get(i);
+		for (int op = 0; op < lstOperation.length; op++) {
+			String operation = lstOperation[op];
+			if (arg.indexOf(operation) != -1) {
+				for (int i = 0; i < elements.size(); i++) {
+					String element = elements.get(i);
 
-			if (element.equals("*") || element.equals("/")) {
-				String elementm1 = "";
-				String elementp1 = "";
-				try {
-					elementm1 = elements.get(i - 1);
-				} catch (Exception e) {
-					System.out.println("elementm1 ereure : " + arg);
-				}
-				try {
-					elementp1 = elements.get(i + 1);
-				} catch (Exception e) {
-					System.out.println("elementp1 erreur : " + arg);
-				}
+					if (element.equals(operation)) {
+						String elementm1 = "";
+						String elementp1 = "";
+						try {
+							elementm1 = elements.get(i - 1);
+						} catch (Exception e) {
+							System.out.println("elementm1 ereure : " + arg);
+						}
+						try {
+							elementp1 = elements.get(i + 1);
+						} catch (Exception e) {
+							System.out.println("elementp1 erreur : " + arg);
+						}
 
-				double numBefor;
-				double numAfter;
-				String blocBefore = "";
-				String blocAfter = "";
-				if (elementm1.equals(")")) {
-					blocBefore = this.extractBlocBefore(elements.subList(0, i));
-					numBefor = this.resolveBloc(blocBefore);
-					blocBefore = "(" + blocBefore + ")";
-				} else {
-					blocBefore = elementm1;
-					numBefor = Double.parseDouble(elementm1);
-				}
+						Double numBefor;
+						Double numAfter;
+						String blocBefore = "";
+						String blocAfter = "";
+						if (elementm1.equals(")")) {
+							blocBefore = this.extractBlocBefore(elements.subList(0, i));
+							numBefor = this.resolveBloc(blocBefore);
+							blocBefore = "(" + blocBefore + ")";
+						} else {
+							blocBefore = elementm1;
+							numBefor = Double.parseDouble(elementm1);
+						}
 
-				if (elementp1.equals("(")) {
-					blocAfter = this.extractBlocAfter(elements.subList(i + 1, elements.size()));
-					numAfter = this.resolveBloc(blocAfter);
-					blocAfter = "(" + blocAfter + ")";
-				} else {
-					blocAfter = elementp1;
-					numAfter = Double.parseDouble(elementp1);
-				}
+						if (elementp1.equals("(")) {
+							blocAfter = this.extractBlocAfter(elements.subList(i + 1, elements.size()));
+							numAfter = this.resolveBloc(blocAfter);
+							blocAfter = "(" + blocAfter + ")";
+						} else {
+							blocAfter = elementp1;
+							try {
+								numAfter = Double.parseDouble(elementp1);
+							} catch (Exception e) {
+								numAfter = 0.0;
+							}
+						}
 
-				// création d'un nouveau bloc à résoudre avec le res de la multiplication
-				String toReplace = blocBefore + element + blocAfter;
-				toReplace = toReplace.replaceAll("\\*", "\\\\*");
-				toReplace = toReplace.replaceAll("\\/", "\\\\/");
-				toReplace = toReplace.replaceAll("\\+", "\\\\+");
-				toReplace = toReplace.replaceAll("\\-", "\\\\-");
-				toReplace = toReplace.replaceAll("\\(", "\\\\(");
-				toReplace = toReplace.replaceAll("\\)", "\\\\)");
-				String newArg = arg.replaceAll(toReplace,
-						String.valueOf(this.opperationSimple(numBefor, numAfter, element.charAt(0))));
+						// création d'un nouveau bloc à résoudre avec le res de la multiplication
+						String toReplace = blocBefore + element + blocAfter;
+						toReplace = this.echapCaract(toReplace);
+						Double resultatOperation = this.opperationSimple(numBefor, element.charAt(0), numAfter);
+						String newArg = "";
+						if (resultatOperation != null) {
+							newArg = arg.replaceAll(toReplace, String.valueOf(resultatOperation));
+						} else {
+							return null;
+						}
 
-				try {
-					return Double.parseDouble(newArg);
-				} catch (Exception e) {
-					return this.resolveBloc(newArg);
-				}
+						try {
+							return Double.parseDouble(newArg);
+						} catch (Exception e) {
+							return this.resolveBloc(newArg);
+						}
 
-			}
-		}
-
-		// traitement des autres oppération non prioritaires
-		for (int i = 0; i < elements.size(); i++) {
-			String element = elements.get(i);
-
-			if (element.equals("+") || element.equals("-")) {
-				String elementm1 = "";
-				String elementp1 = "";
-				try {
-					elementm1 = elements.get(i - 1);
-				} catch (Exception e) {
-					System.out.println("elementm1 ereure : " + arg);
-				}
-				try {
-					elementp1 = elements.get(i + 1);
-				} catch (Exception e) {
-					System.out.println("elementp1 erreur : " + arg);
-				}
-
-				double numBefor;
-				double numAfter;
-				String blocBefore = "";
-				String blocAfter = "";
-				if (elementm1.equals(")")) {
-					blocBefore = this.extractBlocBefore(elements.subList(0, i));
-					numBefor = this.resolveBloc(blocBefore);
-					blocBefore = "(" + blocBefore + ")";
-				} else {
-					blocBefore = elementm1;
-					numBefor = Double.parseDouble(elementm1);
-				}
-
-				if (elementp1.equals("(")) {
-					blocAfter = this.extractBlocAfter(elements.subList(i + 1, elements.size()));
-					numAfter = this.resolveBloc(blocAfter);
-					blocAfter = "(" + blocAfter + ")";
-				} else {
-					blocAfter = elementp1;
-					numAfter = Double.parseDouble(elementp1);
-				}
-
-				// création d'un nouveau bloc à résoudre avec le res de la multiplication
-				String toReplace = blocBefore + element + blocAfter;
-				toReplace = toReplace.replaceAll("\\*", "\\\\*");
-				toReplace = toReplace.replaceAll("\\/", "\\\\/");
-				toReplace = toReplace.replaceAll("\\+", "\\\\+");
-				toReplace = toReplace.replaceAll("\\-", "\\\\-");
-				toReplace = toReplace.replaceAll("\\(", "\\\\(");
-				toReplace = toReplace.replaceAll("\\)", "\\\\)");
-				String newArg = arg.replaceAll(toReplace,
-						String.valueOf(this.opperationSimple(numBefor, numAfter, element.charAt(0))));
-
-				try {
-					return Double.parseDouble(newArg);
-				} catch (Exception e) {
-					return this.resolveBloc(newArg);
+					}
 				}
 			}
 		}
+		return null;
+	}
 
-		// System.out.println(number.size() + "les nombre :");
-		for (int i = 0; i < elements.size(); i++) {
-			// System.out.println(i + " // " + number.get(i));
-		}
-		return (double) 0;
+	private String echapCaract(String toReplace) {
+		toReplace = toReplace.replaceAll("\\*", "\\\\*");
+		toReplace = toReplace.replaceAll("\\/", "\\\\/");
+		toReplace = toReplace.replaceAll("\\+", "\\\\+");
+		toReplace = toReplace.replaceAll("\\-", "\\\\-");
+		toReplace = toReplace.replaceAll("\\(", "\\\\(");
+		toReplace = toReplace.replaceAll("\\)", "\\\\)");
+		toReplace = toReplace.replaceAll("\\^", "\\\\^");
+		return toReplace;
 	}
 
 	public String extractBlocBefore(List<String> elements) {
